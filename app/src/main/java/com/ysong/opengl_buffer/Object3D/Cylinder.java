@@ -2,13 +2,13 @@ package com.ysong.opengl_buffer.Object3D;
 
 import android.opengl.GLES20;
 
-public class Prism extends Object3D {
+public class Cylinder extends Object3D {
 
 	private int[] vbo = new int[3];
 	private int[] ibo = new int[3];
 	private int n;
 
-	public Prism(int n, float radius, float height, float[] color) {
+	public Cylinder(int n, float radius, float height, float[] color) {
 		float[][] vertex = genVertex(n, radius, height);
 		GLES20.glGenBuffers(vbo.length, vbo, 0);
 		for (int i = 0; i < 3; i++) {
@@ -56,9 +56,7 @@ public class Prism extends Object3D {
 		GLES20.glVertexAttribPointer(mNormalHandle, POSITION_SIZE, GLES20.GL_FLOAT, false, BYTE_PER_FLOAT * (POSITION_SIZE + NORMAL_SIZE), BYTE_PER_FLOAT * POSITION_SIZE);
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
-		for (int i = 0; i < n * 4; i += 4) {
-			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 4, GLES20.GL_UNSIGNED_SHORT, BYTE_PER_SHORT * i);
-		}
+		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, n * 2 + 2, GLES20.GL_UNSIGNED_SHORT, 0);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
@@ -76,7 +74,7 @@ public class Prism extends Object3D {
 		float[][] vertex = new float[3][];
 		vertex[0] = new float[n * 6 + 6];
 		vertex[1] = new float[n * 6 + 6];
-		vertex[2] = new float[n * 24];
+		vertex[2] = new float[n * 12];
 		height /= 2;
 		/* top and bottom */
 		for (int i = 0; i < n; i++) {
@@ -99,28 +97,16 @@ public class Prism extends Object3D {
 		/* side */
 		for (int i = 0; i < n; i++) {
 			double angle = Math.PI * 2 * i / n;
-			float x = radius * (float) Math.cos(angle);
-			float y = radius * (float) Math.sin(angle);
-			int prevTopR6 = ((i * 2 + n * 2 - 1) % (n * 2)) * 6;
-			int curTopL6 = i * 2 * 6;
-			int prevBtmR6 = prevTopR6 + n * 2 * 6;
-			int curBtmL6 = curTopL6 + n * 2 * 6;
-			vertex[2][prevTopR6] = vertex[2][curTopL6] = vertex[2][prevBtmR6] = vertex[2][curBtmL6] = x;
-			vertex[2][prevTopR6 + 1] = vertex[2][curTopL6 + 1] = vertex[2][prevBtmR6 + 1] = vertex[2][curBtmL6 + 1] = y;
-			vertex[2][prevTopR6 + 2] = vertex[2][curTopL6 + 2] = height;
-			vertex[2][prevBtmR6 + 2] = vertex[2][curBtmL6 + 2] = -height;
-
-		}
-		for (int i = 0; i < n; i++) {
-			double angle = Math.PI * (i * 2 + 1) / n;
 			float x = (float) Math.cos(angle);
 			float y = (float) Math.sin(angle);
-			int topL6 = i * 2 * 6;
-			int topR6 = (i * 2 + 1) * 6;
-			int btmL6 = topL6 + n * 2 * 6;
-			int btmR6 = topR6 + n * 2 * 6;
-			vertex[2][topL6 + 3] = vertex[2][topR6 + 3] = vertex[2][btmL6 + 3] = vertex[2][btmR6 + 3] = x;
-			vertex[2][topL6 + 4] = vertex[2][topR6 + 4] = vertex[2][btmL6 + 4] = vertex[2][btmR6 + 4] = y;
+			int top6 = i * 6;
+			int btm6 = top6 + n * 6;
+			vertex[2][top6] = vertex[2][btm6] = radius * x;
+			vertex[2][top6 + 1] = vertex[2][btm6 + 1] = radius * y;
+			vertex[2][top6 + 2] = height;
+			vertex[2][btm6 + 2] = -height;
+			vertex[2][top6 + 3] = vertex[2][btm6 + 3] = x;
+			vertex[2][top6 + 4] = vertex[2][btm6 + 4] = y;
 		}
 		return vertex;
 	}
@@ -129,19 +115,17 @@ public class Prism extends Object3D {
 		short[][] index = new short[3][];
 		index[0] = new short[n + 2];
 		index[1] = new short[n + 2];
-		index[2] = new short[n * 4];
+		index[2] = new short[n * 2 + 2];
 		/* top and bottom */
 		for (int i = 0; i < n + 1; i++) {
 			short idx = (short) ((i + n) % (n + 1));
 			index[0][i] = index[1][i] = idx;
 		}
 		/* side */
-		for (int i = 0;i < n; i++) {
-			int i4 = i * 4;
-			index[2][i4] = (short) (i * 2);
-			index[2][i4 + 1] = (short) (i * 2 + n * 2);
-			index[2][i4 + 2] = (short) (i * 2 + 1);
-			index[2][i4 + 3] = (short) (i * 2 + n * 2 + 1);
+		for (int i = 0;i < n + 1; i++) {
+			int i2 = i * 2;
+			index[2][i2] = (short) (i % n);
+			index[2][i2 + 1] = (short) (i % n + n);
 		}
 		return index;
 	}

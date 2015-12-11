@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		mGLSurfaceView = new GLSurfaceView(this);
 		mGLSurfaceView.setEGLContextClientVersion(2);
-		mGLRender = new MyGLRender();
+		mGLRender = new MyGLRender(this);
 		mGLSurfaceView.setRenderer(mGLRender);
 		setContentView(mGLSurfaceView);
 	}
