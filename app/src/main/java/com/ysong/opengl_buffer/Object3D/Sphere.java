@@ -7,8 +7,16 @@ public class Sphere extends Object3D {
 	private int[] vbo = new int[1];
 	private int[] ibo = new int[3];
 	private int n;
+	private float radius;
+	private float[] color;
 
 	public Sphere(int n, float radius, float[] color) {
+		this.n = n;
+		this.radius = radius;
+		this.color = color;
+	}
+
+	public void init() {
 		float[] vertex = genVertex(n, radius);
 		GLES20.glGenBuffers(vbo.length, vbo, 0);
 		vertexBuffer.position(0);
@@ -28,7 +36,6 @@ public class Sphere extends Object3D {
 		}
 
 		GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-		this.n = n;
 	}
 
 	@Override
